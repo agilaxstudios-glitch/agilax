@@ -31,7 +31,7 @@ export const Affiliate: React.FC = () => {
 
   const copyLink = () => {
     if (user && 'referralCode' in user) {
-      navigator.clipboard.writeText(`https://agilaxversel.com/?ref=${(user as AffiliateUser).referralCode}`);
+      navigator.clipboard.writeText(`https://agilax.vercel.app/?ref=${(user as AffiliateUser).referralCode}`);
       alert('Link copied to clipboard!');
     }
   };
@@ -106,7 +106,7 @@ export const Affiliate: React.FC = () => {
             <h3 className="text-xl font-bold mb-4">Your Referral Tools</h3>
             <div className="bg-black/30 p-4 rounded-lg flex items-center justify-between gap-4 border border-white/10">
               <code className="text-agilax-cyan truncate text-sm md:text-base">
-                https://agilaxversel.com/?ref={affiliate.referralCode}
+                https://agilax.vercel.app/?ref={affiliate.referralCode}
               </code>
               <button 
                 onClick={copyLink}
