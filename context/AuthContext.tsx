@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, AffiliateUser } from '../types';
-import { mockService } from '../services/mockService';
+import { api } from '../services/api';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 
 interface AuthContextType {
   user: User | AffiliateUser | null;
@@ -18,45 +20,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check local storage for persisted session on load
-    const storedUser = localStorage.getItem('agilax_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    // Listen for Firebase Auth state changes
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Fetch extended profile from Firestore
+        const profile = await api.getUserProfile(firebaseUser.uid);
+        setUser(profile);
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const login = async (email: string, password: string): Promise<User | AffiliateUser | null> => {
-    const loggedInUser = await mockService.login(email, password);
-    if (loggedInUser) {
-      setUser(loggedInUser);
-      localStorage.setItem('agilax_user', JSON.stringify(loggedInUser));
-      return loggedInUser;
-    }
-    return null;
+    const loggedInUser = await api.login(email, password);
+    // User state updates automatically via onAuthStateChanged
+    return loggedInUser;
   };
 
   const register = async (data: any) => {
-    const user = await mockService.register(data);
-    if (user) {
-      setUser(user);
-      localStorage.setItem('agilax_user', JSON.stringify(user));
-      return true;
-    }
-    return false;
+    const user = await api.register(data);
+    return !!user;
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('agilax_user');
+    api.logout();
+    // User state updates automatically via onAuthStateChanged
   };
 
   const updateProfile = async (data: Partial<User | AffiliateUser>) => {
     if (!user) return false;
-    const updatedUser = await mockService.updateUser(user.id, data);
+    const updatedUser = await api.updateUser(user.id, data);
     if (updatedUser) {
         setUser(updatedUser);
-        localStorage.setItem('agilax_user', JSON.stringify(updatedUser));
         return true;
     }
     return false;

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Check, Download } from 'lucide-react';
 import { GlassCard } from '../components/UI';
-import { mockService } from '../services/mockService';
+import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Order, PayoutRequest, AffiliateUser, EarningData } from '../types';
 
@@ -29,26 +29,26 @@ export const Admin: React.FC = () => {
     }
 
     const loadData = async () => {
-      const o = await mockService.getOrders();
+      const o = await api.getOrders();
       setOrders(o);
-      const a = await mockService.getAllAffiliates();
+      const a = await api.getAllAffiliates();
       setAffiliates(a);
-      const p = await mockService.getPayouts();
+      const p = await api.getPayouts();
       setPayouts(p);
-      const c = await mockService.getEarningsHistory();
+      const c = await api.getEarningsHistory();
       setChartData(c);
     };
     loadData();
   }, [user, navigate, activeTab]);
 
   const handleMarkSent = async (id: string) => {
-    await mockService.updateOrder(id, { isBundleSent: true, status: 'completed' });
+    await api.updateOrder(id, { isBundleSent: true, status: 'completed' });
     // Reload logic or optimistic update
     setOrders(prev => prev.map(o => o.id === id ? { ...o, isBundleSent: true, status: 'completed' } : o));
   };
 
   const handleMarkPaid = async (id: string) => {
-    await mockService.markPayoutPaid(id);
+    await api.markPayoutPaid(id);
     setPayouts(prev => prev.map(p => p.id === id ? { ...p, status: 'paid' } : p));
   };
 
@@ -125,7 +125,7 @@ export const Admin: React.FC = () => {
                       <td className="p-3 font-mono text-xs text-gray-500">{order.id}</td>
                       <td className="p-3 text-white">{order.buyerEmail}</td>
                       <td className="p-3">
-                        <a href="#" className="flex items-center gap-1 text-agilax-cyan hover:underline">
+                        <a href={order.screenshotUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-agilax-cyan hover:underline">
                            <Download size={14} /> View
                         </a>
                       </td>

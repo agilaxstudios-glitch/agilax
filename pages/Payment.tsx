@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QrCode, Upload, CheckCircle, ArrowRight } from 'lucide-react';
 import { GlassCard, GradientButton, Input } from '../components/UI';
-import { mockService } from '../services/mockService';
+import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 export const Payment: React.FC = () => {
@@ -23,7 +23,7 @@ export const Payment: React.FC = () => {
     if (!user?.email || !file) return;
 
     setIsSubmitting(true);
-    await mockService.submitOrder(user.email, file);
+    await api.submitOrder(user.email, file);
     setIsSubmitting(false);
     setShowSuccess(true);
   };
